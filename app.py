@@ -5,7 +5,9 @@ from tensorflow.keras.models import load_model
 import os
 
 app = Flask(__name__)
-model = load_model("model.h5")  # Pre-trained LSTM model
+
+# Load model without compiling to avoid deserialization issues on Render
+model = load_model("model.h5", compile=False)
 
 # Define prediction route
 @app.route("/predict", methods=["POST"])
