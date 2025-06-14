@@ -15,19 +15,27 @@ def predict():
     data = request.get_json()
 
     try:
-        # Example: expecting input as a JSON with all features in a list
+        # Expecting input as a JSON with a "sequence" key containing a list of dicts
+        sequence = data["sequence"]  # List of 24 dicts
+
+        # Extract features in the correct order for each time step
+        feature_names = [
+            "air_temperature",
+            "relative_humidity",
+            "air_pressure",
+            "wind_speed",
+            "hour",
+            "dayofweek",
+            "month"
+        ]
+        # Build a list of lists: shape (24, 7)
         input_features = [
-            data['air_temperature'],
-            data['relative_humidity'],
-            data['air_pressure'],
-            data['wind_speed'],
-            data['hour'],
-            data['dayofweek'],
-            data['month']
+            [step[feature] for feature in feature_names]
+            for step in sequence
         ]
 
-        # Reshape input to match LSTM shape: (1, timesteps, features)
-        input_array = np.array(input_features).reshape(1, 1, len(input_features))
+        # Reshape to (1, 24, 7) for batch size 1
+        input_array = np.array(input_features).reshape(1, 24, 7)
         prediction = model.predict(input_array)[0][0]
 
         return jsonify({'prediction': float(prediction)})
